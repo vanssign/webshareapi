@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebShareAPI</title>
+    </head>
+    <body>
+        <!-- tutorial https://dev.to/daviddalbusco/how-to-implement-the-web-share-api-with-a-fallback-b3 -->
+        <script type="module" src="https://unpkg.com/web-social-share@latest/dist/websocialshare/websocialshare.esm.js"></script>
+        <script nomodule src="https://unpkg.com/web-social-share@latest/dist/websocialshare/websocialshare.js"></script>
+        <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+
+        <button onClick="openShare()">Share</button>
+
+        <web-social-share show="false">
+            <ion-icon name="logo-twitter" arialabel="Twitter" slot="twitter" style="color: #00aced;"></ion-icon>
+            <ion-icon name="mail" slot="email" arialabel="Email" style="color: #ff8ea3;"></ion-icon>
+            <ion-icon name="logo-whatsapp" arialabel="WhatsApp" slot="whatsapp" style="color: #25D366;"></ion-icon>
+        </web-social-share>
+
+        <script language="JavaScript">
+            // check if webshareAPI is available or not
+            openShare = async () => {
+                if (navigator && navigator.share) {
+                    await shareNative();
+                } else {
+                    await shareFallback();
+                }
+            };
+
+            // WebShareAPI
+            function shareNative() {
+                return new Promise(async (resolve) => {
+                    const shareUrl = `${
+                        window.location.protocol
+                    }//${
+                        window.location.host
+                    }`;
+
+                    await navigator.share({text: 'Hey Join the game by clicking', url: shareUrl});
+
+                    resolve();
+                });
+            }
+
+            // Fallback
+            function shareFallback() {
+                return new Promise(async (resolve) => {
+                    const webSocialShare = document.querySelector('web-social-share');
+
+                    if (! webSocialShare || !window) {
+                        return;
+                    }
+
+                    const shareUrl = `${
+                        window.location.protocol
+                    }//${
+                        window.location.host
+                    }`;
+
+                    const share = {
+                        displayNames: true,
+                        config: [
+                            {
+                                twitter: {
+                                    socialShareUrl: shareUrl,
+                                    socialSharePopupWidth: 300,
+                                    socialSharePopupHeight: 400
+                                }
+                            }, {
+                                email: {
+                                    socialShareBody: shareUrl
+                                }
+                            }, {
+                                whatsapp: {
+                                    socialShareUrl: shareUrl
+                                }
+                            }
+                        ]
+                    };
+                    // The configuration, set the share options
+                    webSocialShare.share = share;
+                    // Show/open the share actions
+                    webSocialShare.show = true;
+
+                    resolve();
+                });
+            }
+        </script>
+    </body>
+</html>
